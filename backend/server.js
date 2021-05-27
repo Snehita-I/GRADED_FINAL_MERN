@@ -24,7 +24,7 @@ const classesRouter = require('./routes/classes');
 
 app.use('/assignments', assignmentsRouter);
 app.use('/users', usersRouter);
-app.use('./classes',classesRouter);
+app.use('/classes',classesRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);

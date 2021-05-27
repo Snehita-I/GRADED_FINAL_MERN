@@ -16,11 +16,28 @@ const classSchema = new Schema({
     trim: true,
   },
   semester:{
-    type: String,
+    type: Number,
     required: true,
     trim: true,
-    minlength: 3
-  }
+  },
+  instructors: [
+    {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
+  ],
+  students: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
+  assignments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Assignment'
+    }
+  ]
 }, {
   timestamps: true,
 });
