@@ -1,7 +1,11 @@
-const router = require('express').Router();
-let Class = require('../models/classModel');
-let User = require('../models/userModel');
-let Assignment = require('../models/assignmentModel');
+import express from 'express';
+import Class from '../models/classModel.js';
+import User from '../models/userModel.js';
+import Assignment from '../models/assignmentModel.js';
+import mongodb from 'mongodb';
+import mongoose from 'mongoose';
+const ObjectId = mongodb.ObjectID;
+const router = express.Router();
 router.route('/').get((req, res) => {
   Class.find()
     .then(classes => res.json(classes))
@@ -9,52 +13,87 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post((req, res) => {
-  const courseid = req.body.courseid;
+  const courseCode = req.body.courseCode;
   const name = req.body.name;
   const semester = req.body.semester;
   const instructorsEmailid =req.body.instructorsEmailid;
   const studentsEmailid = req.body.studentsEmailid;
+  const instructor = req.body.instructor;
   const assignments = [];
-
+ 
   console.log(instructorsEmailid);
   console.log(studentsEmailid);
-
-  const instructors =[];
-  const students =[];
-
+  console.log(instructor )
+  //const instructors =[];
+  let students =[];
+  let instructors=[];
+  
   User.find()
    .then(users=>users.forEach((user)=>{
-     if(instructorsEmailid.includes(user.emailid)){
-      instructors.push(user);
-      console.log("instr: ", user.emailid);
+
+     if(instructor==user._id){
+        instructors.push(user);
+        console.log("user is instructor", user);
      }
+
+     if(instructorsEmailid.includes(user.emailid)){
+        instructors.push(user);
+     }
+     
      if(studentsEmailid.includes(user.emailid)){
       students.push(user);
-      console.log("students: ", user.emailid);
+      //res.json("students: ", user.emailid);
      }
    })).then(()=>{
-    const newClass = new Class({courseid, name , semester ,instructors, students,assignments});
 
-    newClass.save()
-      .then(() => res.json('Class added!'))
-      .catch(err => res.status(400).json('Error: ' + err));
+    var newClass={courseCode, name , semester ,instructors, students,assignments};
+    console.log("newClass: ",newClass);
+    Class.create(newClass,function(err,)
+		{
+		  if(err){console.log("error in creating class"+ err);
+        res.status(400).json('Error: ' + err)
+      }
+		  else{
+        console.log("class created");
+			  res.json('Class added!')
+		  }
+		
+	  });
+
    });
+  //   const newClass = new Class({courseCode, name , semester ,instructors, students,assignments});
+
+  //   newClass.save()
+  //     .then(() => res.json('Class added!'))
+  //     .catch(err => res.status(400).json('Error: ' + err));
+  //  });
 
 });
 
 
 router.route('/:id/addAssignment').post((req, res) => {
-  const courseId = req.params.id;
+  const assignmentCode = req.body.assignmentCode;
+  const courseCode = req.params.id;
   const description = req.body.description;
   const title = req.body.title;
   const dueDate = new Date(req.body.dueDate);
   const penality = req.body.penality;
   const lateDueDate = new Date(req.body.lateDueDate);
   const allowLate = req.body.allowLate;
-  const attachments = [];
 
-  const newAssignment = new Assignment({
-    courseId,
+  let users = [];
+  let attachments = [];
+  Class.findById(req.params.id).then(async (assignmentClass)=>{
+      console.log(assignmentClass)
+      await assignmentClass.students.forEach((assignmentClassStudent)=>{
+            users = [...users, assignmentClassStudent]
+    });
+    console.log(users)
+  }).then(()=>{
+  const newAssignment ={
+    users,
+    assignmentCode,
+    courseCode,
     description,
     title,
     dueDate,
@@ -62,25 +101,69 @@ router.route('/:id/addAssignment').post((req, res) => {
     penality,
     allowLate,
     attachments
+  };
+  console.log(newAssignment);
+  Assignment.create(newAssignment,async function(err,newAssignmentcreated)
+		{
+		  if(err){console.log("error in creating assignment"+ err);
+        res.status(400).json('Error: ' + err)
+      }
+		  else{
+        console.log("Assignment created");
+        console.log(newAssignmentcreated);
+        await Class.findById(req.params.id).then((assignmentClass)=>{
+          assignmentClass.assignments.push(newAssignmentcreated._id);
+          console.log("class after assignment: ",assignmentClass);
+          assignmentClass.save().then(()=>{
+            res.json('Assignment added!');
+          })
+        });
+        
+		  }
+      
+	  });
+    console.log("NA",newAssignment)
+    })
+});
+     
+    
+  router.route('/:id/addStudent').post((req, res) => {
+        const studentEmailId = req.body.studentEmailId;
+        
+        User.find()
+   .then(users=>users.forEach((user)=>{
+         if(user.emailId===studentEmailId){
+                  Class.findById(req.params.id).then((userClass)=>{
+                        userClass.students.push(user);
+                        userClass.save()
+                  .then(() => res.json('Student added!'))
+                  .catch(err => res.status(400).json('Error: ' + err));
+                  });
+                  
+         }
+      }
+   ))
+
   });
 
-  newAssignment.save()
-      .then(() => 
-      {
-        Class.findById(req.params.id, function (err, assignmentclass) {
-          if (err){
-              console.log(err);
-          }
-          else{
-              assignmentclass.assignments.push(newAssignment);
-          }
-      });
-        res.json('Assignment added!');
-      })
-      .catch(err => res.status(400).json('Error: ' + err));
 
+  router.route('/:id/addInstructor').post((req, res) => {
+    const instructorEmailId = req.body.instructorEmailId;
+    
+    User.find().then(users=>users.forEach((user)=>{
+     if(user.emailId===instructorEmailId){
+              Class.findById(req.params.id).then((userClass)=>{
+                    userClass.instructors.push(user);
+                    userClass.save()
+              .then(() => res.json('Instructor added!'))
+              .catch(err => res.status(400).json('Error: ' + err));
+              });
+              
+            }
+        }
+      ))
 
-});
+   });
 
 router.route('/:id').delete((req, res) => {
   Class.findByIdAndDelete(req.params.id)
@@ -95,4 +178,4 @@ router.route('/:id').get((req, res) => {
 });
 
 
-module.exports = router;
+export default router;

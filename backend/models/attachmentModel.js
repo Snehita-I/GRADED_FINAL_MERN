@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
 const attachmentSchema = new Schema({
-  studId: {
+  studCode: {
     type: String,
     required: true,
     unique: true,
@@ -29,4 +29,4 @@ const attachmentSchema = new Schema({
 
 const Attachment = mongoose.model('Attachment', attachmentSchema);
 
-module.exports = Attachment;
+export default Attachment;

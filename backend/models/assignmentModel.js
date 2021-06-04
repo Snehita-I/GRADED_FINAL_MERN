@@ -1,28 +1,31 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
 const assignmentSchema = new Schema({
+  assignmentCode: { type: String, required: true, unique:true},
   description: { type: String, required: true },
   title: {type:String, required: true},
-  courseId: {type: String, required:true},
+  courseCode: {type: String, required:true},
   dueDate: { type: Date, required: true },
   allowLate: { type: Boolean ,required: true},
   penality: {type: Number, require: true},
   lateDueDate: {type: Date, required:true},
-  allowedPlagrismPercent: {type: Number},
-  keywordsUri: {type:String},
-  allowedFileType: [{type:String}], 
+  allowedPlagrismPercent: {type: Number,required:false},
+  keywordsUri: {type:String,required:false},
+  allowedFileType: [{type:String,required:false}], 
   attachments:[
     {
       type: Schema.Types.ObjectId,
-      ref: 'Attachment'
+      ref: 'Attachment',
+      required:false
     }
   ],
   users:[
     {
       type: Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required:false
     }
   ]
 }, {
@@ -31,4 +34,4 @@ const assignmentSchema = new Schema({
 
 const Assignment = mongoose.model('Assignment', assignmentSchema);
 
-module.exports = Assignment;
+export default Assignment;

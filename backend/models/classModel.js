@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
 const classSchema = new Schema({
-  courseid: {
+  courseCode: {
     type: String,
     required: true,
-    unique: true,
+    unique:true,
     trim: true,
     minlength: 3
   },
@@ -44,4 +44,4 @@ const classSchema = new Schema({
 
 const Class = mongoose.model('Class', classSchema);
 
-module.exports = Class;
+export default Class;

@@ -1,6 +1,6 @@
-const router = require('express').Router();
-let User = require('../models/userModel');
-
+import express from 'express';
+import User from '../models/userModel.js';
+const router = express.Router();
 router.route('/').get((req, res) => {
   User.find()
     .then(users => res.json(users))
@@ -8,12 +8,12 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post((req, res) => {
-  const username = req.body.username;
-  const emailid = req.body.emailid;
-  const studid = req.body.studid;
+  const userName = req.body.userName;
+  const emailId = req.body.emailId;
+  const studCode = req.body.studCode;
 
-  console.log(username, emailid, studid);
-  const newUser = new User({username,emailid,studid});
+  console.log(userName, emailId, studCode);
+  const newUser = new User({userName,emailId,studCode});
 
   newUser.save()
     .then(() => res.json('User added!'))
@@ -47,5 +47,4 @@ router.route('/update/:id').post((req, res) => {
 });
 
 
-
-module.exports = router;
+export default router;

@@ -1,18 +1,23 @@
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { BrowserRouter as Router, Route} from "react-router-dom";
 
-import Navbar from "./components/navbar.component";
-import CreateUser from "./components/create-user.component";
-
+import ClassesPage from './components/ClassesPage/ClassesPage'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import ClassPage from './components/ClassPage/ClassPage'
+//import AssignmentDetailPage from './components/AssignmentDetailPage/AssignmentDetailPage'
+import AssignmentPage from './components/Assignment/Assignments.jsx';
+import AssignmentDetailPage from './components/AssignmentDetailPage/AssignmentDetailPage';
 function App() {
   return (
     <Router>
-      <div className="container">
-      <Navbar />
-      <br/>
-      <Route path="/user" component={CreateUser} />
-      </div>
+    <div className="App">
+     <Switch>
+     <Route path='/classesPage/:userId/:userName' component={ClassesPage}/>
+       <Route path='/classPage/:userId/:userName/:classId/:name/:courseId/:isInstructor' render={(props) => <ClassPage {...props}/>}/>
+       <Route exact path='/' component={AssignmentPage}/>
+       <Route path='/assignmentDetailPage/:userId/:userName' component={AssignmentDetailPage}/>
+      </Switch>
+    </div>
     </Router>
   );
 }

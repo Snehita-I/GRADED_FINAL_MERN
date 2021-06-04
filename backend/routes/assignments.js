@@ -1,7 +1,8 @@
-const router = require('express').Router();
-let Assignment = require('../models/assignmentModel');
-let Attachment = require('../models/attachmentModel');
-
+import express from 'express';
+import Assignment from '../models/assignmentModel.js';
+import Attachment from '../models/attachmentModel.js';
+//import assignmentDetailPages from '../../src/components/AssignmentDetailPage/AssignmentDetailPage.jsx';
+const router = express.Router()
 router.route('/').get((req, res) => {
   Assignment.find()
     .then(exercises => res.json(exercises))
@@ -45,7 +46,7 @@ router.route('/:id/addAttachment').post((req,res) =>{
         Assignment.findById(req.params.id).then((assignment) => {
 
           assignment.attachments.push(newAttachment);
-          assignmentattachment.save().then(()=>{
+          assignment.save().then(()=>{
             res.json('Attachment updated');
           });
         });
@@ -74,4 +75,5 @@ router.route('/:id').get((req, res) => {
 
 
 
-module.exports = router;
+
+export default router;
