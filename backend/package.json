@@ -16,6 +16,8 @@
     "dotenv": "^8.6.0",
     "express": "^4.17.1",
     "mongoose": "^5.12.11",
-    "react-hook-form": "^7.6.9"
+    "react-hook-form": "^7.6.9",
+    "react": "16.8.0",
+    "react-dom": "16.8.0"
   }
 }

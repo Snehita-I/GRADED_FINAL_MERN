@@ -62,14 +62,14 @@ function ClassesPage (props) {
     )
   }
 
-  useEffect(async () => {
+  useEffect(  () => {
     async function fetchData(){
         let dataTemp = []
         let classesPasrOfStud = []
         let classesPasrOfInstr = []
         let isPartOfClass = 0
         const response = await axios.get('http://localhost:5000/classes/');
-        
+        console.log("classes"+response.data);
         response.data.map((classObtained) => {
             console.log(classObtained._id);
             isPartOfClass = 0;

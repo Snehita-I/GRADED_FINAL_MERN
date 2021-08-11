@@ -9,7 +9,10 @@ import { TiUserAdd } from 'react-icons/ti'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
+
+import { Link } from 'react-router-dom'
 import AssignmentCard from './AssignmentCard'
+import PollCard from './PollCard'
 
 function AssignmentList (props) {
   //assignmentsOfClass
@@ -28,9 +31,28 @@ function AssignmentList (props) {
       <ul>{assignmentItems}</ul>
   )
 }
+
+
+function PollList (props) {
+  //assignmentsOfClass
+  const polls = props.polls;
+  console.log(polls.length)
+  const pollItems = polls.map((poll) =>
+      <PollCard
+        poll={poll}
+        key={poll._id}
+        userName={props.userName}
+        userId={props.userId}
+        isInstructor={props.isInstructor}
+      />
+  )
+  return (
+      <ul>{pollItems}</ul>
+  )
+}
 function ClassPage (props) {
   const { userId, userName, classId, courseCode, isInstructor, name } = useParams()
-  const [selectedTab, setSelectedTab] = useState(0)
+  const [selectedTab, setSelectedTab] = useState(0) 
   const classUid = classId
   const [isModalOpen, setIsModalOpen] = useState(false)
   
@@ -78,7 +100,8 @@ function ClassPage (props) {
               <Tabs value={selectedTab} onChange={handleChange}>
                 <Tab label = 'Stream'/>
                 <Tab label = 'People'/>
-              </Tabs></div>
+              </Tabs>
+              </div>
                 {isInstructor &&
                 <button className='border-white shadow-none focus:shadow-none focus:border-white' onClick={() => { setIsModalOpen(true) }}>
                   <p className='text-white text-lg mb-4 h-full'>Add Assignment</p>
@@ -165,12 +188,13 @@ function ClassPage (props) {
 }
 
 async function PeopleCard (props) {
+  console.log("props.person"+props.person);
   const response = await axios.get('http://localhost:5000/users/'+props.person);
   
   // const isInstructor = props.isInstructor
   return (
     <div className='h-11' >
-      <div className='flex justify-start'><p className='text-gray-600 pb-8'>{response.data.name}</p></div>
+      <div className='flex justify-start'><p className='text-gray-600 pb-8'>{response.data.userName}</p></div>
     </div>
   )
 }
@@ -179,16 +203,22 @@ function PeopleList (props) {
   console.log("props: ",props.people);
   const people= props.people;
   console.log("prople: ",people)
-  let peopleItems = []
-  people.forEach((person)=>{
-    peopleItems.push(<PeopleCard
-      person={person}
-      key={person}
-    />);
-  }) 
+    let peopleItems = [];
+    people.map((person)=>{
+          console.log("person finally"+person);
+        peopleItems.push(
+        <li key={person}>
+          <PeopleCard 
+            person={person}
+          />
+        </li>);
+      });
+     console.log("")
   
   return (
-    <ul>{peopleItems}</ul>
+    <div>
+      <ul>{peopleItems}</ul>
+    </div>
   )
 }
 function PeoplePage (props) {
@@ -210,18 +240,19 @@ function PeoplePage (props) {
       response.data.students.map(async (student)=>{
         dataTempStudents.push(student);
         
-      })
+      });
+      
       setStudents([...dataTempStudents])
-      response.data.instructors.map(async (student)=>{
+      response.data.instructors.map((student)=>{
         dataTempInstructors.push(student);
-        
-      })
+        console.log("I PUSHED"+student);
+      });
+      
       setInstructors([...dataTempInstructors])
-   //dataTemp.push({"assignments":response.data.assignments,"id":response.data._id})
       
     }
     fetchData();
-  }, [classId])
+  }, [classId, instructors, props.classId])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   //useEffect( async () => {
    // const insTemp=[];
@@ -326,49 +357,98 @@ function PeoplePage (props) {
 
 
 function ClassPageStream (props) {
+  const elements = [];
   const [data, setData] = useState([])
+  const [polls, setPolls] = useState([])
   const userId = props.userId
   const userName = props.userName
   const isInstructor = props.isInstructor
   const classId = props.classId
-
-  
+  const courseCode = props.courseCode
+  const name = props.name
   
   // const [instructors, setInstructors] = useState(['9G649wYEVM0qjUqTPNqO'])
 
   useEffect(() => {
     async function fetchData(){
     let dataTemp = []
+    let dataTemp2 = []
       console.log("ClassStream:",classId)
       const response = await axios.get('http://localhost:5000/classes/'+classId);
       console.log(response);
       response.data.assignments.map(async (assignment)=>{
         console.log("assignemnt: ",assignment," ",typeof(assignment));
       const response1 = await axios.get('http://localhost:5000/assignments/'+assignment);
-      console.log("res1: ",response1);
+      //console.log("res1: ",response1);
       dataTemp.push(response1.data);
       setData([...dataTemp])
       }
       )
+
+      // response.data.polls.map(async (poll)=>{
+      //   console.log("poll: ",poll," ",typeof(poll));
+      // const response2 = await axios.get('http://localhost:5000/polls/'+poll);
+      // //console.log("res2: ",response2);
+      // dataTemp2.push(response2.data);
+      // setPolls([...dataTemp2])
+      // console.log("data: ",dataTemp2);
+      // console.log("polls: ",polls)
+
+      // }
+      //)
    //dataTemp.push({"assignments":response.data.assignments,"id":response.data._id})
       
     }
     fetchData();
-  }, [classId])
+  }, [classId, polls])
   return (
       <div className='component bg-gray-200 w-full h-screen'>
 
-            <div className='component rounded h-24 mt-4 mx-32 bg-purple-600 bg-opacity-80'>
+            <div className='component rounded h-30 mt-4 mx-32 bg-purple-600 bg-opacity-80'>
                 <p className='text-white text-lg pt-2 font-bold'>{props.name}</p>
+                <Link className='rounded-lg w-48 py-1 bg-purple-500 hover:bg-purple-400 text-white' to={
+    {
+      
+      //'/announcementsPage/:userId/:userName/:classId/:name/:courseId/:isInstructor
+      pathname: '/announcementsPage/'+userId+'/' + userName + '/' + classId+'/'+name+'/'+courseCode+'/'+isInstructor,
+      state: {  }
+    } }> Go to Announcement </Link>
+
+    <br/>
+     <Link className='rounded-lg w-48 py-1 bg-purple-500 hover:bg-purple-400 text-white' to={
+    {
+      
+      //'/announcementsPage/:userId/:userName/:classId/:name/:courseId/:isInstructor
+      pathname: '/quizzesPage/'+userId+'/' + userName + '/' + classId+'/'+name+'/'+courseCode+'/'+isInstructor+'/'+props.courseCode,
+      state: { 
+        
+       }
+    } }> Go to Quizzes </Link>
+    <br/>
+     <Link className='rounded-lg w-48 py-1 bg-purple-500 hover:bg-purple-400 text-white' to={
+    {
+      
+      //'/announcementsPage/:userId/:userName/:classId/:name/:courseId/:isInstructor
+      pathname: '/pollPage/'+userId+'/' + userName + '/' + classId+'/'+name+'/'+courseCode+'/'+isInstructor,
+     
+      state: { 
+        
+       }
+    } }> Go to Polls </Link>
                 <div className='w-64 mt-2'>
                   <p className='text-white'>{props.courseCode}</p>
                 </div>
             </div>
+            
             <div className='container mx-auto self-center flex-row items-center justify-center w-4/5'>
                 <AssignmentList assignments={data} userName={userName} isInstructor={isInstructor} userId={userId}/>
-
+                {/* <PollList polls={polls} userName={userName} isInstructor={isInstructor} userId={userId}/> */}
             </div>
+
+      
+
      </div>
   )
 }
-export default ClassPage
+
+export default ClassPage;

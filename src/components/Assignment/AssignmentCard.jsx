@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import AssignmentDetailPage from '../AssignmentDetailPage/AssignmentDetailPage'
 function AssignmentCard (props) {
 
   return (
@@ -19,7 +20,7 @@ function AssignmentCard (props) {
     {
       pathname: '/assignmentDetailPage/' + props.userId + '/' + props.userName,
       state: { assignment: props.assignment }
-    } }> Go to Assignment </Link>
+    } } onClick={AssignmentDetailPage}> Go to Assignment </Link>
 
            <div className='grid grid-cols-6 gap-4'>
                 <div className='col-end-7 col-span-2 pr-2 max-w-2xl h-10 md:max-w-lg'>

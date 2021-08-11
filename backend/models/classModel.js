@@ -37,6 +37,12 @@ const classSchema = new Schema({
       type: Schema.Types.ObjectId,
       ref: 'Assignment'
     }
+  ],
+  announcements: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Announcement'
+    }
   ]
 }, {
   timestamps: true,
